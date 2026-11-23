@@ -16,6 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  ANDROID_CMDLINE_TOOLS_VERSION: '12266719'
   ANDROID_NDK_VERSION: '28.2.13676358'
   JAVA_VERSION: '17.0.18+8'
 
@@ -76,7 +77,10 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
-      - run: sdkmanager "ndk;$ANDROID_NDK_VERSION"
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+        with:
+          cmdline-tools-version: ${{ env.ANDROID_CMDLINE_TOOLS_VERSION }}
+          packages: ndk;${{ env.ANDROID_NDK_VERSION }}
       - run: rustup target add aarch64-linux-android
       - name: Build for Android arm64 at API 26
         run: |
@@ -141,7 +145,10 @@ jobs:
             android/**/*.gradle.kts
             android/gradle/wrapper/gradle-wrapper.properties
             android/**/gradle.lockfile
-      - run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+        with:
+          cmdline-tools-version: ${{ env.ANDROID_CMDLINE_TOOLS_VERSION }}
+          packages: platforms;android-36 build-tools;36.0.0
       - name: Build and check the Android app
         run: |
           mkdir -p artifacts
