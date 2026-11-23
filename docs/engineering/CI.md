@@ -12,7 +12,14 @@ The [CI workflow](../../.github/workflows/ci.yml) runs on pull requests to `main
 
 Exact SDK and dependency pins are in `global.json`, `rust-toolchain.toml`, `android/app/build.gradle.kts`, the Gradle Wrapper and the workflow. `minSdk` 26 and the NDK API 26 build are bootstrap choices pending the physical-device matrix. CI evidence should include the run URL, commit SHA, job results and non-sensitive artifact links.
 
-The Android build uses strict dependency locking against `android/app/gradle.lockfile`. When dependency pins change, generate the new lock in Actions with `./gradlew --write-locks :app:dependencies :app:lintDebug :app:testDebugUnitTest :app:assembleDebug`. Commit the generated lock and verify a fresh run without `--write-locks`.
+The Android build uses strict dependency locking against `android/app/gradle.lockfile`. When dependency pins change, regenerate the lock through the debug and release build tasks in Actions. The `kotlin-stdlib-common` metadata-only module is excluded from lock validation because Gradle can omit it when applying the JVM runtime lock. The Kotlin JVM standard library is locked.
+
+```sh
+./gradlew --write-locks :app:lintDebug :app:testDebugUnitTest :app:assembleDebug \
+  :app:lintRelease :app:testReleaseUnitTest :app:assembleRelease
+```
+
+Commit the generated lock and verify a fresh run without `--write-locks`.
 
 ## Open acceptance gates
 

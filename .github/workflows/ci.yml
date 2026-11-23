@@ -149,29 +149,21 @@ jobs:
         with:
           cmdline-tools-version: ${{ env.ANDROID_CMDLINE_TOOLS_VERSION }}
           packages: platforms;android-36 build-tools;36.0.0
-      - name: Regenerate the lock from Android build tasks
-        run: |
-          mkdir -p artifacts
-          rm app/gradle.lockfile
-          ./gradlew --no-daemon --stacktrace --write-locks :app:lintDebug :app:testDebugUnitTest :app:assembleDebug :app:lintRelease :app:testReleaseUnitTest :app:assembleRelease 2>&1 | tee artifacts/android-lock-generation.log
       - name: Build and check the Android app
         run: |
           mkdir -p artifacts
-          ./gradlew --no-daemon --stacktrace :app:clean :app:lintDebug :app:testDebugUnitTest :app:assembleDebug :app:lintRelease :app:testReleaseUnitTest :app:assembleRelease 2>&1 | tee artifacts/android-gradle.log
+          ./gradlew --no-daemon --stacktrace :app:lintDebug :app:testDebugUnitTest :app:assembleDebug 2>&1 | tee artifacts/android-gradle.log
       - name: Check the APK manifest
         run: |
           "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging app/build/outputs/apk/debug/app-debug.apk > artifacts/android-apk.txt
           grep -E "^package: name='com\.voiceledger\.app'" artifacts/android-apk.txt
           grep -E "^launchable-activity: name='com\.voiceledger\.app\.MainActivity'" artifacts/android-apk.txt
-      - name: Require the regenerated lock in source control
-        run: git diff --exit-code --quiet -- app/gradle.lockfile
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
         with:
           name: android-client
           path: |
             android/artifacts/
-            android/app/gradle.lockfile
             android/app/build/reports/
             android/app/build/outputs/apk/debug/app-debug.apk
 

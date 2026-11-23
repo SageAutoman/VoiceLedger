@@ -36,7 +36,7 @@ kotlin {
 dependencyLocking {
     lockAllConfigurations()
     lockMode.set(LockMode.STRICT)
-    // Gradle records this metadata-only module when generating the JVM runtime lock.
+    // This metadata-only module can appear when writing locks and disappear in locked JVM resolution.
     ignoredDependencies.add("org.jetbrains.kotlin:kotlin-stdlib-common")
 }
 
